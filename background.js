@@ -26,10 +26,10 @@ function notifyAllTabs(isActive) {
   });
 }
 
-let connections = {};
+var connections = {};
 
 chrome.storage.local.get(["isActive"], function (result) {
-  let isActive = result.isActive || false;
+  let isActive = result?.isActive || false;
   setIcon(isActive);
   notifyAllTabs(isActive);
 });
@@ -48,6 +48,7 @@ chrome.runtime.onConnect.addListener(function (port) {
         chrome.storage.local.get(["isActive"], function (result) {
           port.postMessage({ isActive: result.isActive || false });
         });
+        return true;
       }
     });
   }
