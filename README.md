@@ -1,5 +1,9 @@
 # Link In Same Page Extension
 
+## Preview
+
+![demo](./demo.webp)
+
 ## Overview
 
 The "Link In Same Page" extension is a proof of concept designed to allow users to browse the web within the same browser tab, instead of opening new tabs for each link. This approach aims to streamline web interaction by consolidating content into a single, navigable panel within the user's current tab.
