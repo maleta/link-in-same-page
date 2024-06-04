@@ -138,9 +138,7 @@ function styleAddressBarContainer(container) {
 function styleInfoBox(infoBox) {
   infoBox.style.position = "absolute";
   infoBox.style.width = "97vw";
-  // infoBox.style.minWidth = "97vw";
   infoBox.style.height = "97vh";
-  //infoBox.style.minHeight = "97vh";
   infoBox.style.backgroundColor = "white";
   infoBox.style.border = "1px solid black";
   infoBox.style.zIndex = "1000";
