@@ -105,7 +105,7 @@ function createToolbar(infoBox, linkHref) {
     } else {
       iframe.style.display = "none";
 
-      infoBox.style.height = "40px";
+      infoBox.style.height = "55px";
       toggleButton.textContent = "Expand";
     }
   });
