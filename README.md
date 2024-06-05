@@ -2,7 +2,7 @@
 
 ## Preview
 
-![demo](./demo.webp)
+![demo](./demo.gif)
 
 ## Overview
 
