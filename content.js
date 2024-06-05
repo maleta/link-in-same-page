@@ -37,18 +37,6 @@ function handleLinkClick(event) {
 
 let port = chrome.runtime.connect({ name: "morepagesinasignletab" });
 
-port.onMessage.addListener(function (response) {
-  if (response.isActive) {
-    attachLinkHandlers();
-  } else {
-    detachLinkHandlers();
-  }
-});
-port.postMessage({ query: "isActive" });
-
-port.onDisconnect.addListener(function () {
-  port = null;
-});
 function createInfoBox(linkHref) {
   const infoBox = document.createElement("div");
   infoBox.id = "infoBox" + linkHref;
@@ -146,3 +134,10 @@ function styleInfoBox(infoBox) {
 
   infoBox.style.boxShadow = "0px 4px 8px rgba(0, 0, 0, 0.1)";
 }
+
+chrome.storage.local.get(["isActive"], function (result) {
+  console.log(result);
+  if (result?.isActive || false) {
+    attachLinkHandlers();
+  }
+});

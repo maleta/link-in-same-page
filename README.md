@@ -1,4 +1,4 @@
-# Link In Same Page Extension: A Proof of Concept
+# Transforming Desktop Browsing Experience: A Proof of Concept
 
 ## Preview
 
