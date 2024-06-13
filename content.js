@@ -67,9 +67,31 @@ function createIframe(href) {
   iframe.style.width = "100%";
   iframe.style.height = "100%";
   iframe.style.border = "none";
+
+  iframe.onload = () => {
+    try {
+      const iframeDocument =
+        iframe.contentDocument || iframe.contentWindow.document;
+
+      observeIframeContent(iframeDocument);
+    } catch {}
+  };
   return iframe;
 }
+function observeIframeContent(iframeDocument) {
+  const iframeObserver = new MutationObserver((mutationsList) => {
+    for (const mutation of mutationsList) {
+      if (mutation.type === "childList") {
+        attachLinkHandlers(iframeDocument);
+      }
+    }
+  });
 
+  iframeObserver.observe(iframeDocument.body, {
+    childList: true,
+    subtree: true,
+  });
+}
 function createAddressBar(href) {
   const addressBar = document.createElement("input");
   addressBar.type = "text";
