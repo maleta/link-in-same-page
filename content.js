@@ -42,8 +42,6 @@ function handleLinkClick(event) {
   infoBox.style.left = `${leftPosition}px`;
 }
 
-let port = chrome.runtime.connect({ name: "morepagesinasignletab" });
-
 function createInfoBox(linkHref) {
   const infoBox = document.createElement("div");
   infoBox.id = "infoBox" + linkHref;
@@ -141,6 +139,19 @@ function styleInfoBox(infoBox) {
 
   infoBox.style.boxShadow = "0px 4px 8px rgba(0, 0, 0, 0.1)";
 }
+
+const observer = new MutationObserver((mutationsList) => {
+  for (const mutation of mutationsList) {
+    if (mutation.type === "childList") {
+      attachLinkHandlers();
+    }
+  }
+});
+
+observer.observe(document.body, {
+  childList: true,
+  subtree: true,
+});
 
 chrome.storage.local.get(["isActive"], function (result) {
   if (result?.isActive || false) {
