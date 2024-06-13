@@ -15,7 +15,6 @@ function detachLinkHandlers() {
   const links = document.querySelectorAll("a[href]");
   links.forEach((link) => {
     if (link.dataset.listenerAttached) {
-      console.log("removing handler for", link.href);
       link.removeEventListener("click", handleLinkClick);
       link.dataset.listenerAttached = false;
     }
@@ -23,11 +22,19 @@ function detachLinkHandlers() {
 }
 
 function handleLinkClick(event) {
+  let linkElement = event.target;
+  while (linkElement && linkElement.tagName !== "A") {
+    linkElement = linkElement.parentElement;
+  }
+
+  if (!linkElement) {
+    return;
+  }
   event.preventDefault();
-  const infoBox = createInfoBox(event.target.href);
+  const infoBox = createInfoBox(linkElement.href);
   document.body.appendChild(infoBox);
 
-  const linkRect = event.target.getBoundingClientRect();
+  const linkRect = linkElement.getBoundingClientRect();
   const topPosition = linkRect.bottom + window.scrollY;
   const leftPosition = (window.innerWidth - infoBox.offsetWidth) / 2;
 
@@ -136,7 +143,6 @@ function styleInfoBox(infoBox) {
 }
 
 chrome.storage.local.get(["isActive"], function (result) {
-  console.log(result);
   if (result?.isActive || false) {
     attachLinkHandlers();
   }
