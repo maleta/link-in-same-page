@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Link Modifier",
+  "name": "Link In Same Page",
   "version": "1.0",
   "permissions": ["activeTab", "scripting", "storage"],
   "action": {

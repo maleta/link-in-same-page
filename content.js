@@ -1,9 +1,12 @@
 function attachLinkHandlers() {
   const links = document.querySelectorAll("a[href]");
   links.forEach((link) => {
+    const linkOrigin = new URL(link.href).origin;
     if (!link.dataset.listenerAttached) {
-      link.addEventListener("click", handleLinkClick);
-      link.dataset.listenerAttached = "true";
+      if (linkOrigin !== window.location.origin) {
+        link.addEventListener("click", handleLinkClick);
+      }
+      link.dataset.listenerAttached = true;
     }
   });
 }
@@ -13,17 +16,25 @@ function detachLinkHandlers() {
   links.forEach((link) => {
     if (link.dataset.listenerAttached) {
       link.removeEventListener("click", handleLinkClick);
-      link.dataset.listenerAttached = "false";
+      link.dataset.listenerAttached = false;
     }
   });
 }
 
 function handleLinkClick(event) {
+  let linkElement = event.target;
+  while (linkElement && linkElement.tagName !== "A") {
+    linkElement = linkElement.parentElement;
+  }
+
+  if (!linkElement) {
+    return;
+  }
   event.preventDefault();
-  const infoBox = createInfoBox(event.target.href);
+  const infoBox = createInfoBox(linkElement.href);
   document.body.appendChild(infoBox);
 
-  const linkRect = event.target.getBoundingClientRect();
+  const linkRect = linkElement.getBoundingClientRect();
   const topPosition = linkRect.bottom + window.scrollY;
   const leftPosition = (window.innerWidth - infoBox.offsetWidth) / 2;
 
@@ -31,34 +42,17 @@ function handleLinkClick(event) {
   infoBox.style.left = `${leftPosition}px`;
 }
 
-let port = chrome.runtime.connect({ name: "morepagesinasignletab" });
-
-port.onMessage.addListener(function (response) {
-  console.log("received message", response);
-  if (response.isActive) {
-    attachLinkHandlers();
-  } else {
-    detachLinkHandlers();
-  }
-});
-port.postMessage({ query: "isActive" });
-
-port.onDisconnect.addListener(function () {
-  console.log("Disconnected");
-  port = null;
-});
 function createInfoBox(linkHref) {
   const infoBox = document.createElement("div");
-  infoBox.id = "infoBox-linkHref";
+  infoBox.id = "infoBox" + linkHref;
   const addressBarContainer = document.createElement("div");
   const addressBar = createAddressBar(linkHref);
-  const toolbar = createToolbar(infoBox);
-
+  const toolbar = createToolbar(infoBox, linkHref);
   addressBarContainer.appendChild(addressBar);
   addressBarContainer.appendChild(toolbar);
+
   infoBox.appendChild(addressBarContainer);
   const iframe = createIframe(linkHref);
-
   infoBox.appendChild(iframe);
 
   styleInfoBox(infoBox);
@@ -69,17 +63,39 @@ function createInfoBox(linkHref) {
 function createIframe(href) {
   const iframe = document.createElement("iframe");
   iframe.src = href;
+  iframe.id = "infoBoxIframe" + href;
   iframe.style.width = "100%";
-  iframe.style.height = "calc(80vh - 50px)";
+  iframe.style.height = "100%";
   iframe.style.border = "none";
+
+  iframe.onload = () => {
+    try {
+      const iframeDocument =
+        iframe.contentDocument || iframe.contentWindow.document;
+
+      observeIframeContent(iframeDocument);
+    } catch {}
+  };
   return iframe;
 }
+function observeIframeContent(iframeDocument) {
+  const iframeObserver = new MutationObserver((mutationsList) => {
+    for (const mutation of mutationsList) {
+      if (mutation.type === "childList") {
+        attachLinkHandlers(iframeDocument);
+      }
+    }
+  });
 
+  iframeObserver.observe(iframeDocument.body, {
+    childList: true,
+    subtree: true,
+  });
+}
 function createAddressBar(href) {
   const addressBar = document.createElement("input");
   addressBar.type = "text";
   addressBar.value = href;
-  addressBar.readOnly = true;
   addressBar.style.width = "80%";
   addressBar.style.marginRight = "10px";
   addressBar.style.padding = "5px";
@@ -88,7 +104,7 @@ function createAddressBar(href) {
   return addressBar;
 }
 
-function createToolbar(infoBox) {
+function createToolbar(infoBox, linkHref) {
   const toolbar = document.createElement("div");
   toolbar.style.display = "flex";
   toolbar.style.gap = "10px";
@@ -105,8 +121,26 @@ function createToolbar(infoBox) {
     window.open(this.parentNode.previousElementSibling.value, "_blank");
   });
 
-  toolbar.appendChild(closeButton);
+  const toggleButton = document.createElement("button");
+  toggleButton.textContent = "Collapse";
+  toggleButton.addEventListener("click", function () {
+    const iframe = document.getElementById("infoBoxIframe" + linkHref);
+    if (iframe.style.display === "none") {
+      iframe.style.display = "block";
+      infoBox.style.height = "97vh";
+      toggleButton.textContent = "Collapse";
+    } else {
+      iframe.style.display = "none";
+
+      infoBox.style.height = "55px";
+      toggleButton.textContent = "Expand";
+    }
+  });
+
   toolbar.appendChild(openTabButton);
+  toolbar.appendChild(toggleButton);
+  toolbar.appendChild(closeButton);
+
   return toolbar;
 }
 
@@ -118,12 +152,31 @@ function styleAddressBarContainer(container) {
 
 function styleInfoBox(infoBox) {
   infoBox.style.position = "absolute";
-  infoBox.style.width = "80vw";
-  infoBox.style.minWidth = "1024px";
-  infoBox.style.height = "80vh";
+  infoBox.style.width = "97vw";
+  infoBox.style.height = "97vh";
   infoBox.style.backgroundColor = "white";
   infoBox.style.border = "1px solid black";
   infoBox.style.zIndex = "1000";
   infoBox.style.overflow = "hidden";
+
   infoBox.style.boxShadow = "0px 4px 8px rgba(0, 0, 0, 0.1)";
 }
+
+const observer = new MutationObserver((mutationsList) => {
+  for (const mutation of mutationsList) {
+    if (mutation.type === "childList") {
+      attachLinkHandlers();
+    }
+  }
+});
+
+observer.observe(document.body, {
+  childList: true,
+  subtree: true,
+});
+
+chrome.storage.local.get(["isActive"], function (result) {
+  if (result?.isActive || false) {
+    attachLinkHandlers();
+  }
+});

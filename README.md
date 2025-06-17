@@ -1,4 +1,8 @@
-# Link In Same Page Extension
+# Transforming Desktop Browsing Experience: A Proof of Concept
+
+## Preview
+
+![demo](./demo1.webp)
 
 ## Overview
 
@@ -14,22 +18,4 @@ While the "Link In Same Page" extension provides a unique browsing experience, i
 - **Phishing Risks**: Displaying content in iframes can obscure the actual origin of the content, potentially making it easier for malicious entities to mislead users about the authenticity of information, increasing the risk of phishing.
 - **Cross-Site Scripting (XSS)**: If not properly sanitized, embedding content from external sites via iframes can lead to XSS attacks, allowing attackers to execute malicious scripts in the context of the user's session.
 
-These risks suggest that while the extension offers innovative browsing capabilities, users should proceed with caution, particularly on untrusted or unknown websites.
-
-## Installation Notes
-
-To install the "Link In Same Page" extension in Google Chrome, follow these steps to load it as an unpacked extension:
-
-1. **Download the Extension**: Clone or download the extension files to your local machine.
-
-2. **Open Chrome Extensions Page**: Navigate to `chrome://extensions/` in your Google Chrome browser.
-
-3. **Enable Developer Mode**: At the top right of the Extensions page, toggle the "Developer mode" switch to enable developer features.
-
-4. **Load Unpacked Extension**: Click the "Load unpacked" button that appears after you enable Developer mode. This opens a file dialog.
-
-5. **Select the Extension Directory**: Navigate to where you saved the unpacked extension files on your computer and select the main folder of the extension. Chrome will process the contents and load the extension into your browser.
-
-6. **Ensure Proper Permissions**: Check that the extension has the necessary permissions to run. Adjust settings as necessary from the extensions menu.
-
-By following these steps, you should be able to successfully load and start using the "Link In Same Page" extension to explore its capabilities and limits in browsing web content within a single tab.
+There might be other exploits as well, so keep in mind that this extension is for Proof of Concept purpose only.
